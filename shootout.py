@@ -12,26 +12,29 @@ messages.messages["_gamemodes"]["shootout"] = "shootout"
 class Shootout(GameMode):
     def __init__(self, arg=""):
         super().__init__(arg)
-        self.LIMIT_ABSTAIN = True
-        self.DAY_TIME_LIMIT = 45
-        self.DAY_TIME_WARN = 30
-        self.SHORT_DAY_LIMIT = 45
-        self.SHORT_DAY_WARN = 30
-        self.NIGHT_TIME_LIMIT = 45
-        self.NIGHT_TIME_WARN = 30
+        self.CUSTOM_SETTINGS.limit_abstain = True
+        self.CUSTOM_SETTINGS.day_time_limit = 45
+        self.CUSTOM_SETTINGS.day_time_warn = 30
+        self.CUSTOM_SETTINGS.short_day_time_limit = 45
+        self.CUSTOM_SETTINGS.short_day_time_warn = 30
+        self.CUSTOM_SETTINGS.night_time_limit = 45
+        self.CUSTOM_SETTINGS.night_time_warn = 30
 
         # 70% chance of hitting, 30% chance of headshot upon hit, 5% chance of explosion
         self.GUN_CHANCES = {
-            "gunner": (0.7, 0.25, 0.3),
-            "wolf gunner": (0.7, 0.25, 0.3),
-            "sharpshooter": (1, 0, 1)
-        }
-
-        # gunners get more bullets every night; start them off with 0
-        self.SHOTS_MULTIPLIER = {
-            "gunner": 0,
-            "sharpshooter": 0,
-            "wolf gunner": 0
+            "gunner": {
+                "hit": -1/20, # 75 -> 70
+                "headshot": 1/10, # 20 -> 30
+            },
+            "wolf gunner": {
+                "hit": -1/20,
+                "headshot": 1/10,
+            },
+            "sharpshooter": {
+                "hit": 1,
+                "headshot": 1,
+                "explode": -1,
+            },
         }
 
         # for display only; gets overridden in role_attribution and role_attribution_end so
@@ -47,6 +50,7 @@ class Shootout(GameMode):
             "num_totems": EventListener(self.on_num_totems),
             "chk_win": EventListener(self.on_chk_win, priority=0),
             "player_win": EventListener(self.on_player_win),
+            "gun_bullets": EventListener(self.gunner_bullets),
         }
 
         self.TOTEM_CHANCES = {totem: {} for totem in self.DEFAULT_TOTEM_CHANCES}
@@ -63,27 +67,23 @@ class Shootout(GameMode):
         self.TOTEM_CHANCES["luck"]["shaman"] = 15
         self.TOTEM_CHANCES["misdirection"]["shaman"] = 20
 
-        self.original_settings = None
-
     def on_role_attribution(self, evt, var, chk_win_conditions, villagers):
-        # dirty hack incoming; this shuts off validation that our mode has to have wolves
-        self.original_settings = var.ORIGINAL_SETTINGS
-        var.ORIGINAL_SETTINGS = None
         # add shamans equal to the number of players and ignore ROLE_GUIDE
         evt.data["addroles"]["shaman"] = len(villagers)
         evt.prevent_default = True
 
     def on_role_attribution_end(self, evt, var, main_roles, all_roles):
-        # requirement for dirty hack is over, restore original settings
-        var.ORIGINAL_SETTINGS = self.original_settings
         # make everyone a gunner
         for player in get_players("shaman", mainroles=main_roles):
             evt.data["actions"].append(("add", player, "gunner"))
 
+    def gunner_bullets(self, evt, var, player, role):
+        evt.data["bullets"] = 0 # gunners get more bullets every night; start them off with 0
+
     def on_num_totems(self, evt, var, player, role):
-        lpl = len(get_players())
+        lpl = len(get_players(var))
         if role == "shaman":
-            if lpl < 4 or (lpl == 4 and var.NIGHT_COUNT > 1):
+            if lpl < 4 or (lpl == 4 and var.night_count > 1):
                 evt.data["num"] = 1
             elif 4 <= lpl < 8 or lpl >= 9:
                 evt.data["num"] = 2
@@ -94,14 +94,14 @@ class Shootout(GameMode):
         # let shamans give totems out to everyone
         LASTGIVEN.clear()
         # give gunners more bullets
-        div = len(get_players()) + 1
+        div = len(get_players(var)) + 1
         add_bullets = int(max(20 / div, 1))
         for p in GUNNERS:
             GUNNERS[p] += add_bullets
 
     def on_chk_win(self, evt, var, rolemap, mainroles, lpl, lwolves, lrealwolves):
         evt.stop_processing = True
-        alive = len(get_players())
+        alive = len(get_players(var))
         if lpl == 0 and alive > 0:
             # don't stop game if there are alive but injured people
             # (lpl excludes absent players)

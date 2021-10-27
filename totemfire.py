@@ -12,8 +12,8 @@ messages.messages["_gamemodes"]["totemroyale"] = "totemroyale"
 class TotemMode(GameMode):
     def __init__(self, arg=""):
         super().__init__(arg)
-        self.LIMIT_ABSTAIN = False
-        self.DEFAULT_ROLE = "crazed shaman"
+        self.CUSTOM_SETTINGS.limit_abstain = False
+        self.CUSTOM_SETTINGS.default_role = "crazed shaman"
         self.EVENTS = {
             "transition_night_begin": EventListener(self.on_transition_night_begin),
             "num_totems": EventListener(self.on_num_totems)
@@ -29,7 +29,7 @@ class TotemMode(GameMode):
 
     def on_num_totems(self, evt, var, player, role):
         if role == "crazed shaman":
-            evt.data["num"] = round(math.sqrt(len(get_players())))
+            evt.data["num"] = round(math.sqrt(len(get_players(var))))
 
     def on_transition_night_begin(self, evt, var):
         from src.roles.crazedshaman import LASTGIVEN
@@ -58,8 +58,8 @@ class TotemRoyaleMode(TotemMode):
     def __init__(self, arg=""):
         super().__init__(arg)
         # reset default to villager so !roles doesn't get confused, we ignore ROLE_GUIDE anyway
-        self.DEFAULT_ROLE = "villager"
-        self.STATS_TYPE = "disabled"
+        self.CUSTOM_SETTINGS.default_role = "villager"
+        self.CUSTOM_SETTINGS.stats_type = "disabled"
         self.ROLE_GUIDE = {
             2: ["crazed shaman"]
         }
@@ -67,7 +67,6 @@ class TotemRoyaleMode(TotemMode):
         self.EVENTS = {
             "chk_win": EventListener(self.on_chk_win, priority=0),
             "role_attribution": EventListener(self.on_role_attribution),
-            "role_attribution_end": EventListener(self.on_role_attribution_end),
         }
 
         self.TOTEM_CHANCES = {
@@ -90,22 +89,13 @@ class TotemRoyaleMode(TotemMode):
         }
         self.set_default_totem_chances()
 
-        self.original_settings = None
-
     def on_role_attribution(self, evt, var, chk_win_conditions, villagers):
-        # dirty hack incoming; this shuts off validation that our mode has to have wolves
-        self.original_settings = var.ORIGINAL_SETTINGS
-        var.ORIGINAL_SETTINGS = None
         # add crazed shamans equal to the number of players and ignore ROLE_GUIDE
         evt.data["addroles"]["crazed shaman"] = len(villagers)
         evt.prevent_default = True
 
-    def on_role_attribution_end(self, evt, var, main_roles, all_roles):
-        # requirement for dirty hack is over, restore original settings
-        var.ORIGINAL_SETTINGS = self.original_settings
-
     def on_chk_win(self, evt, var, rolemap, mainroles, lpl, lwolves, lrealwolves):
         evt.stop_processing = True
-        if len(get_players()) == 1:
+        if len(get_players(var)) == 1:
             evt.data["winner"] = "no_team_wins"
             evt.data["message"] = messages["totemroyale_win"]
