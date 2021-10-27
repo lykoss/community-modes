@@ -46,7 +46,7 @@ class ClassicfireMode(GameMode):
 
     def on_num_totems(self, evt, var, player, role):
         if role == "crazed shaman":
-            evt.data["num"] = len(get_players()) - 1
+            evt.data["num"] = len(get_players(var)) - 1
 
     def on_role_attribution_end(self, evt, var, main_roles, all_roles):
         target = random.choice(get_players(var, Wolf, mainroles=main_roles))
