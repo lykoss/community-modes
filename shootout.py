@@ -67,14 +67,14 @@ class Shootout(GameMode):
         self.TOTEM_CHANCES["luck"]["shaman"] = 15
         self.TOTEM_CHANCES["misdirection"]["shaman"] = 20
 
-    def on_role_attribution(self, evt, var, chk_win_conditions, villagers):
+    def on_role_attribution(self, evt, var, villagers):
         # add shamans equal to the number of players and ignore ROLE_GUIDE
         evt.data["addroles"]["shaman"] = len(villagers)
         evt.prevent_default = True
 
     def on_role_attribution_end(self, evt, var, main_roles, all_roles):
         # make everyone a gunner
-        for player in get_players("shaman", mainroles=main_roles):
+        for player in get_players(var, "shaman", mainroles=main_roles):
             evt.data["actions"].append(("add", player, "gunner"))
 
     def gunner_bullets(self, evt, var, player, role):

@@ -89,7 +89,7 @@ class TotemRoyaleMode(TotemMode):
         }
         self.set_default_totem_chances()
 
-    def on_role_attribution(self, evt, var, chk_win_conditions, villagers):
+    def on_role_attribution(self, evt, var, villagers):
         # add crazed shamans equal to the number of players and ignore ROLE_GUIDE
         evt.data["addroles"]["crazed shaman"] = len(villagers)
         evt.prevent_default = True
