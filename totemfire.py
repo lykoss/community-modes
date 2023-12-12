@@ -94,7 +94,7 @@ class TotemRoyaleMode(TotemMode):
         evt.data["addroles"]["crazed shaman"] = len(villagers)
         evt.prevent_default = True
 
-    def on_chk_win(self, evt, var, rolemap, mainroles, lpl, lwolves, lrealwolves):
+    def on_chk_win(self, evt, var, rolemap, mainroles, lpl, lwolves, lrealwolves, lvampires):
         evt.stop_processing = True
         if len(get_players(var)) == 1:
             evt.data["winner"] = "no_team_wins"

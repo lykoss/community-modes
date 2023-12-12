@@ -99,7 +99,7 @@ class Shootout(GameMode):
         for p in GUNNERS:
             GUNNERS[p] += add_bullets
 
-    def on_chk_win(self, evt, var, rolemap, mainroles, lpl, lwolves, lrealwolves):
+    def on_chk_win(self, evt, var, rolemap, mainroles, lpl, lwolves, lrealwolves, lvampires):
         evt.stop_processing = True
         alive = len(get_players(var))
         if lpl == 0 and alive > 0:
