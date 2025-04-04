@@ -1,5 +1,4 @@
-import random
-
+from src.random import random
 from src.functions import get_players
 from src.gamemodes import GameMode, game_mode
 from src.events import EventListener
@@ -8,7 +7,7 @@ from src.messages import messages
 
 messages.messages["_gamemodes"]["classicfire"] = "classicfire"
 
-@game_mode("classicfire", minp=4, maxp=24, likelihood=10)
+@game_mode("classicfire", minp=4, maxp=24)
 class ClassicfireMode(GameMode):
     """ <@misha> and "more balanced than maelstrom" isn't too difficult a bar to clear"""
 

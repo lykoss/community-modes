@@ -1,5 +1,6 @@
+from src.cats import Nobody
 from src.gamemodes import game_mode, GameMode
-from src.functions import get_players, get_main_role, change_role
+from src.functions import get_players
 from src.messages import messages
 from src.events import EventListener
 import math
@@ -35,14 +36,14 @@ class TotemMode(GameMode):
         from src.roles.crazedshaman import LASTGIVEN
         LASTGIVEN.clear()
 
-@game_mode("totemfire", minp=4, maxp=24, likelihood=10)
+@game_mode("totemfire", minp=4, maxp=24)
 class PlebTotemMode(TotemMode):
     def __init__(self, arg=""):
         super().__init__(arg)
         for totem in ("narcolepsy", "impatience", "pacifism"):
             self.TOTEM_CHANCES[totem]["crazed shaman"] = 0
 
-@game_mode("toteminferno", minp=4, maxp=24, likelihood=10)
+@game_mode("toteminferno", minp=4, maxp=24)
 class PlebTotemMode(TotemMode):
     def __init__(self, arg=""):
         super().__init__(arg)
@@ -53,7 +54,7 @@ class PlebTotemMode(TotemMode):
         self.TOTEM_CHANCES["lycanthropy"]["crazed shaman"] = 60
         self.TOTEM_CHANCES["misdirection"]["crazed shaman"] = 0
 
-@game_mode("totemroyale", minp=2, maxp=24, likelihood=10)
+@game_mode("totemroyale", minp=2, maxp=24)
 class TotemRoyaleMode(TotemMode):
     def __init__(self, arg=""):
         super().__init__(arg)
@@ -96,6 +97,6 @@ class TotemRoyaleMode(TotemMode):
 
     def on_chk_win(self, evt, var, rolemap, mainroles, lpl, lwolves, lrealwolves, lvampires):
         evt.stop_processing = True
-        if len(get_players(var)) == 1:
-            evt.data["winner"] = "no_team_wins"
+        if lpl == 1:
+            evt.data["winner"] = Nobody
             evt.data["message"] = messages["totemroyale_win"]

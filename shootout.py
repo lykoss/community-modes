@@ -1,14 +1,13 @@
+from src.cats import Nobody
 from src.gamemodes import game_mode, GameMode
-from src.functions import get_players, get_all_players, get_main_role, change_role
-from src.status import get_absent
+from src.functions import get_players
 from src.messages import messages
 from src.events import EventListener
-import math  # never a bad idea
 
 messages.messages["shootout_win"] = "Game over! The remaining shaman removes their bulletproof vest and begins to fashion a totem of alcohol..."
 messages.messages["_gamemodes"]["shootout"] = "shootout"
 
-@game_mode("shootout", minp=2, maxp=24, likelihood=10)
+@game_mode("shootout", minp=2, maxp=24)
 class Shootout(GameMode):
     def __init__(self, arg=""):
         super().__init__(arg)
@@ -107,7 +106,7 @@ class Shootout(GameMode):
             # (lpl excludes absent players)
             evt.data["winner"] = None
         elif alive == 1:
-            evt.data["winner"] = "no_team_wins"
+            evt.data["winner"] = Nobody
             evt.data["message"] = messages["shootout_win"]
 
     def on_player_win(self, evt, var, player, main_role, all_roles, winner, team_win, survived):
